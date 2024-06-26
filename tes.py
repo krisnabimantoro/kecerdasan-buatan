@@ -87,7 +87,19 @@ agglo_labels = agglo.fit_predict(encoded_images_pca)
 fig, ax = plt.subplots()
 plt.subplots_adjust(left=0.25, bottom=0.25)
 
-scatter = ax.scatter(encoded_images_pca[:, 0], encoded_images_pca[:, 1], c=kmeans_labels, cmap='viridis')
+# Mapping labels to colors
+label_color_map = {
+    0: 'blue',    # arch
+    1: 'green',   # whorl
+    2: 'red',     # left loop
+    3: 'purple',  # right loop
+    4: 'orange'   # rest
+}
+
+# Convert kmeans_labels to 5 categories
+kmeans_labels_5_categories = np.where(kmeans_labels < 5, kmeans_labels, 4)
+
+scatter = ax.scatter(encoded_images_pca[:, 0], encoded_images_pca[:, 1], c=[label_color_map[label] for label in kmeans_labels_5_categories])
 
 # Add widgets for interactive clustering
 axcolor = 'lightgoldenrodyellow'
@@ -98,7 +110,11 @@ def update(val):
     n_clusters = int(slider_clusters.val)
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     kmeans_labels = kmeans.fit_predict(encoded_images_pca)
-    scatter.set_array(kmeans_labels)
+    
+    # Convert kmeans_labels to 5 categories
+    kmeans_labels_5_categories = np.where(kmeans_labels < 5, kmeans_labels, 4)
+    
+    scatter.set_color([label_color_map[label] for label in kmeans_labels_5_categories])
     fig.canvas.draw_idle()
 
 slider_clusters.on_changed(update)
